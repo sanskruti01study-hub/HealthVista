@@ -41,7 +41,8 @@ fun HealthVistaApp() {
     var activity by rememberSaveable { mutableStateOf(false) }
     var nutrition by rememberSaveable { mutableStateOf(false) }
     var sleep by rememberSaveable { mutableStateOf(7f) }
-
+var height by rememberSaveable { mutableStateOf(165f) }
+var weight by rememberSaveable { mutableStateOf(60f) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -172,7 +173,51 @@ fun HealthVistaApp() {
                 )
             }
         }
+// BMI CALCULATOR
+Card(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.padding(16.dp)) {
 
+        Text("⚖️ BMI Calculator",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text("Height: ${height.toInt()} cm")
+
+        Slider(
+            value = height,
+            onValueChange = { height = it },
+            valueRange = 120f..210f
+        )
+
+        Text("Weight: ${weight.toInt()} kg")
+
+        Slider(
+            value = weight,
+            onValueChange = { weight = it },
+            valueRange = 30f..150f
+        )
+
+        val bmi = weight / ((height / 100f) * (height / 100f))
+
+        Text(
+            "Your BMI: %.1f".format(bmi),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Green
+        )
+
+        Text(
+            when {
+                bmi < 18.5f -> "Underweight"
+                bmi < 25f -> "Normal weight"
+                bmi < 30f -> "Overweight"
+                else -> "Obese"
+            }
+        )
+    }
+}
         Spacer(modifier = Modifier.height(25.dp))
 
         Text("Healthy Lifestyle Tips 🌱",
