@@ -242,7 +242,16 @@ Card(modifier = Modifier.fillMaxWidth()) {
                 }
             }
         }
+        Text(
+            "Voice Assistant",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = Dark
+        )
 
+        Spacer(modifier = Modifier.height(12.dp))
+
+        VoiceAssistantSection()
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
