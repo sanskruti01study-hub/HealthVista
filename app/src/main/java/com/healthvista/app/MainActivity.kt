@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,23 +45,26 @@ private enum class Tab(val title: String, val icon: String) {
 @Composable
 private fun HealthVistaApp() {
     var tab by remember { mutableStateOf(Tab.Home) }
-    var elder by remember { mutableStateOf(false) }
+    var elder by rememberSaveable { mutableStateOf(false) }
     var question by remember { mutableStateOf("") }
     var chat by remember { mutableStateOf(listOf("Hello! I’m your HealthVista wellness coach. How can I help today?")) }
     var newReminder by remember { mutableStateOf("") }
     var reminders by remember { mutableStateOf(listOf("Drink a glass of water", "Take a 10-minute walk", "Prepare for bedtime")) }
-    val scale = if (elder) 1.18f else 1f
+    val scale = if (elder) 1.25f else 1f
 
     MaterialTheme(colorScheme = lightColorScheme(primary = Teal, secondary = DarkTeal, background = Page, surface = Color.White, onSurface = Ink)) {
         Scaffold(
             containerColor = Page,
             bottomBar = {
-                NavigationBar(containerColor = Color.White) {
+                NavigationBar(
+                    modifier = Modifier.height(if (elder) 88.dp else 80.dp),
+                    containerColor = Color.White
+                ) {
                     Tab.values().forEach { item ->
                         NavigationBarItem(
                             selected = tab == item, onClick = { tab = item },
-                            icon = { Text(item.icon, fontSize = if (elder) 25.sp else 21.sp) },
-                            label = { Text(item.title, fontSize = if (elder) 12.sp else 10.sp) },
+                            icon = { Text(item.icon, fontSize = if (elder) 28.sp else 21.sp) },
+                            label = { Text(item.title, fontSize = if (elder) 13.sp else 10.sp, fontWeight = if (elder) FontWeight.SemiBold else FontWeight.Normal) },
                             colors = NavigationBarItemDefaults.colors(selectedIconColor = Teal, selectedTextColor = Teal, indicatorColor = Mint)
                         )
                     }
@@ -114,7 +118,11 @@ private fun HomeScreen(scale: Float, elder: Boolean, go: (Tab) -> Unit) {
                     Text("You’re doing great. Keep going!", color = Color.White, fontSize = (22 * scale).sp, fontWeight = FontWeight.Bold)
                     Text("A little movement, water and rest can make a difference.", color = Color.White, fontSize = (14 * scale).sp)
                     Spacer(Modifier.height(12.dp))
-                    Button(onClick = { go(Tab.Progress) }, colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = DarkTeal)) { Text("View my progress") }
+                    Button(
+                        onClick = { go(Tab.Progress) },
+                        modifier = Modifier.heightIn(min = if (elder) 56.dp else 48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = DarkTeal)
+                    ) { Text("View my progress", fontSize = (14 * scale).sp) }
                 }
             }
         }
@@ -223,7 +231,7 @@ private fun CoachScreen(scale: Float, question: String, onQuestion: (String) -> 
         Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(question, onQuestion, Modifier.weight(1f), placeholder = { Text("Type your question…") }, shape = RoundedCornerShape(18.dp), maxLines = 3)
             Spacer(Modifier.width(8.dp))
-            Button(onClick = send, shape = CircleShape, contentPadding = PaddingValues(15.dp)) { Text("➤") }
+            Button(onClick = send, modifier = Modifier.size(if (scale > 1f) 60.dp else 48.dp), shape = CircleShape, contentPadding = PaddingValues(15.dp)) { Text("➤", fontSize = (18 * scale).sp) }
         }
         Text("Prototype chat uses sample responses, not medical advice.", Modifier.padding(horizontal = 16.dp), color = Muted, fontSize = 10.sp)
     }
@@ -236,7 +244,7 @@ private fun ReminderScreen(scale: Float, text: String, onText: (String) -> Unit,
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(text, onText, Modifier.weight(1f), placeholder = { Text("Add a reminder") }, shape = RoundedCornerShape(16.dp), singleLine = true)
             Spacer(Modifier.width(8.dp))
-            Button(onClick = add, modifier = Modifier.height(54.dp)) { Text("Add") }
+            Button(onClick = add, modifier = Modifier.height(if (scale > 1f) 60.dp else 54.dp)) { Text("Add", fontSize = (14 * scale).sp) }
         }
         Text("TODAY", Modifier.padding(start = 20.dp, top = 20.dp, bottom = 10.dp), color = Teal, fontWeight = FontWeight.Bold, fontSize = 12.sp)
         LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -245,7 +253,7 @@ private fun ReminderScreen(scale: Float, text: String, onText: (String) -> Unit,
                     Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text("◉", color = Teal, fontSize = 23.sp)
                         Text(item, Modifier.weight(1f).padding(horizontal = 12.dp), color = Ink, fontSize = (15 * scale).sp)
-                        TextButton(onClick = { remove(item) }) { Text("Done") }
+                        TextButton(onClick = { remove(item) }, modifier = Modifier.heightIn(min = if (scale > 1f) 52.dp else 40.dp)) { Text("Done", fontSize = (14 * scale).sp) }
                     }
                 }
             }
@@ -277,7 +285,11 @@ private fun ProfileScreen(scale: Float, elder: Boolean, onElder: (Boolean) -> Un
                         Text("Elder Mode", fontSize = (16 * scale).sp, fontWeight = FontWeight.Bold)
                         Text("Large text, large buttons and simpler navigation", color = Muted, fontSize = (12 * scale).sp)
                     }
-                    Switch(checked = elder, onCheckedChange = onElder)
+                    Switch(
+                        checked = elder,
+                        onCheckedChange = onElder,
+                        modifier = Modifier.sizeIn(minWidth = 56.dp, minHeight = 48.dp)
+                    )
                 }
                 HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Mint)
                 Text("Turn this on for larger text and clearer controls across the app.", color = Muted, fontSize = (13 * scale).sp)
