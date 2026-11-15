@@ -261,8 +261,6 @@ private fun ReminderScreen(scale: Float, text: String, onText: (String) -> Unit,
         }
     }
 }
-        Spacer(modifier = Modifier.height(25.dp))
-
 @Composable
 private fun ProfileScreen(scale: Float, elder: Boolean, onElder: (Boolean) -> Unit) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
