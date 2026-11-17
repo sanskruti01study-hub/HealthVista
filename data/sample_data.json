@@ -1,0 +1,64 @@
+{
+"user_id": "user_123",
+
+"history": [
+    {
+        "sleep_hours": 7.2,
+        "steps": 6500,
+        "screen_time_hours": 5.5,
+        "water_liters": 2.0,
+        "sweet_intake_servings": 1
+    },
+    {
+        "sleep_hours": 7.4,
+        "steps": 6800,
+        "screen_time_hours": 5.2,
+        "water_liters": 2.1,
+        "sweet_intake_servings": 1
+    },
+    {
+        "sleep_hours": 7.1,
+        "steps": 6200,
+        "screen_time_hours": 5.8,
+        "water_liters": 1.9,
+        "sweet_intake_servings": 2
+    },
+    {
+        "sleep_hours": 7.0,
+        "steps": 6100,
+        "screen_time_hours": 5.6,
+        "water_liters": 2.0,
+        "sweet_intake_servings": 1
+    },
+    {
+        "sleep_hours": 6.8,
+        "steps": 5900,
+        "screen_time_hours": 6.0,
+        "water_liters": 1.8,
+        "sweet_intake_servings": 2
+    },
+    {
+        "sleep_hours": 7.3,
+        "steps": 7000,
+        "screen_time_hours": 5.0,
+        "water_liters": 2.2,
+        "sweet_intake_servings": 1
+    },
+    {
+        "sleep_hours": 7.1,
+        "steps": 6400,
+        "screen_time_hours": 5.4,
+        "water_liters": 2.0,
+        "sweet_intake_servings": 1
+    }
+],
+
+"today": {
+    "steps": 4100,
+    "sleep_hours": 5.8,
+    "water_liters": 2.0,
+    "screen_time_hours": 7.6,
+    "sweet_intake_servings": 2
+}
+
+}

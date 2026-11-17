@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from flask import Flask, request, jsonify
 from wellness_score import calculate_wellness_score
 from baseline import calculate_personal_baseline
@@ -48,3 +49,22 @@ def analyze_health():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+=======
+import json
+from wellness_score import calculate_wellness_score
+
+def main():
+    try:
+        with open("data/sample_data.json", "r") as f:
+            user_data = json.load(f)
+    except FileNotFoundError:
+        print("Sample data file not found!")
+        return
+
+    score = calculate_wellness_score(user_data)
+    print(f"--- Health Vista AI Engine ---")
+    print(f"Calculated Wellness Score: {score} / 100")
+
+if __name__ == "__main__":
+    main()
+>>>>>>> 358c14c368c3c7af094a09200031ff8a9d0d74f2
