@@ -3,14 +3,11 @@ package com.healthvista.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,284 +19,245 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.healthvista.app.ui.theme.HealthVistaTheme
 
-private val Teal = Color(0xFF087F80)
-private val DarkTeal = Color(0xFF075B60)
-private val Mint = Color(0xFFE5F5F1)
-private val Page = Color(0xFFF5F8F7)
-private val Ink = Color(0xFF193334)
-private val Muted = Color(0xFF6B8080)
+private val Green = Color(0xFF267A59)
+private val Background = Color(0xFFF5F8F4)
+private val Dark = Color(0xFF20352B)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent { HealthVistaTheme { HealthVistaApp() } }
-    }
-}
-
-private enum class Tab(val title: String, val icon: String) {
-    Home("Home", "⌂"), Progress("Progress", "◷"), Coach("AI Coach", "✦"),
-    Reminders("Reminders", "◉"), Profile("Profile", "☺")
-}
-
-@Composable
-private fun HealthVistaApp() {
-    var tab by remember { mutableStateOf(Tab.Home) }
-    var elder by rememberSaveable { mutableStateOf(false) }
-    var question by remember { mutableStateOf("") }
-    var chat by remember { mutableStateOf(listOf("Hello! I’m your HealthVista wellness coach. How can I help today?")) }
-    var newReminder by remember { mutableStateOf("") }
-    var reminders by remember { mutableStateOf(listOf("Drink a glass of water", "Take a 10-minute walk", "Prepare for bedtime")) }
-    val scale = if (elder) 1.25f else 1f
-
-    MaterialTheme(colorScheme = lightColorScheme(primary = Teal, secondary = DarkTeal, background = Page, surface = Color.White, onSurface = Ink)) {
-        Scaffold(
-            containerColor = Page,
-            bottomBar = {
-                NavigationBar(
-                    modifier = Modifier.height(if (elder) 88.dp else 80.dp),
-                    containerColor = Color.White
-                ) {
-                    Tab.values().forEach { item ->
-                        NavigationBarItem(
-                            selected = tab == item, onClick = { tab = item },
-                            icon = { Text(item.icon, fontSize = if (elder) 28.sp else 21.sp) },
-                            label = { Text(item.title, fontSize = if (elder) 13.sp else 10.sp, fontWeight = if (elder) FontWeight.SemiBold else FontWeight.Normal) },
-                            colors = NavigationBarItemDefaults.colors(selectedIconColor = Teal, selectedTextColor = Teal, indicatorColor = Mint)
-                        )
-                    }
-                }
-            }
-        ) { padding ->
-            Box(Modifier.fillMaxSize().padding(padding).background(Page)) {
-                when (tab) {
-                    Tab.Home -> HomeScreen(scale, elder) { tab = it }
-                    Tab.Progress -> ProgressScreen(scale)
-                    Tab.Coach -> CoachScreen(scale, question, { question = it }, chat) {
-                        if (question.isNotBlank()) {
-                            chat = chat + "You: $question" + "Coach: Thanks for sharing. Try one small healthy step today. For medical concerns, contact a healthcare professional."
-                            question = ""
-                        }
-                    }
-                    Tab.Reminders -> ReminderScreen(scale, newReminder, { newReminder = it }, reminders, {
-                        if (newReminder.isNotBlank()) { reminders = reminders + newReminder.trim(); newReminder = "" }
-                    }, { reminders = reminders - it })
-                    Tab.Profile -> ProfileScreen(scale, elder) { elder = it }
-                }
+        setContent {
+            HealthVistaTheme {
+HealthVistaApp()
             }
         }
     }
 }
 
 @Composable
-private fun Header(title: String, subtitle: String, scale: Float) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp)) {
-        Text("HEALTHVISTA", color = Teal, fontSize = (12 * scale).sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
-        Text(title, color = Ink, fontSize = (28 * scale).sp, fontWeight = FontWeight.Bold)
-        Text(subtitle, color = Muted, fontSize = (14 * scale).sp)
-    }
-}
+fun HealthVistaApp() {
 
-@Composable
-private fun Panel(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    Card(modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-        Column(Modifier.padding(16.dp), content = content)
-    }
-}
+    var water by rememberSaveable { mutableStateOf(0) }
+    var activity by rememberSaveable { mutableStateOf(false) }
+    var nutrition by rememberSaveable { mutableStateOf(false) }
+    var sleep by rememberSaveable { mutableStateOf(7f) }
+var height by rememberSaveable { mutableStateOf(165f) }
+var weight by rememberSaveable { mutableStateOf(60f) }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Background)
+            .verticalScroll(rememberScrollState())
+            .padding(20.dp)
+    ) {
 
-@Composable
-private fun HomeScreen(scale: Float, elder: Boolean, go: (Tab) -> Unit) {
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { Header("Good morning!", "Small steps make a healthier you.", scale) }
-        item {
-            Card(Modifier.padding(horizontal = 16.dp).fillMaxWidth(), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = DarkTeal)) {
-                Column(Modifier.padding(20.dp)) {
-                    Text("YOUR WELLNESS TODAY", color = Color(0xFFBDE9DF), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    Text("You’re doing great. Keep going!", color = Color.White, fontSize = (22 * scale).sp, fontWeight = FontWeight.Bold)
-                    Text("A little movement, water and rest can make a difference.", color = Color.White, fontSize = (14 * scale).sp)
-                    Spacer(Modifier.height(12.dp))
-                    Button(
-                        onClick = { go(Tab.Progress) },
-                        modifier = Modifier.heightIn(min = if (elder) 56.dp else 48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = DarkTeal)
-                    ) { Text("View my progress", fontSize = (14 * scale).sp) }
-                }
+        Text(
+            "🟩 HealthVista",
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold,
+            color = Green
+        )
+
+        Text("Your wellness companion", color = Green)
+
+        Spacer(modifier = Modifier.height(25.dp))
+
+        Text("Hello, there! 👋", fontSize = 28.sp,
+            fontWeight = FontWeight.Bold, color = Dark)
+
+        Text("Let's take care of your health today.")
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = Green
+            ),
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(22.dp)) {
+                Text("YOUR DAILY WELLNESS", color = Color.White)
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    "Small steps,\nhealthier life!",
+                    fontSize = 27.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    "Build healthy habits one day at a time.",
+                    color = Color.White
+                )
             }
         }
-        item {
-            Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Today's overview", fontSize = (20 * scale).sp, fontWeight = FontWeight.Bold)
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Metric("👟", "Steps", "3,250", "of 6,000", Modifier.weight(1f), scale)
-                    Metric("💧", "Water", "4 glasses", "of 8 glasses", Modifier.weight(1f), scale)
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Metric("🌙", "Sleep", "7.5 hrs", "last night", Modifier.weight(1f), scale)
-                    Metric("🌿", "Mood", "Good", "keep it up", Modifier.weight(1f), scale)
-                }
-            }
-        }
-        item {
-            Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
-                Text("Quick actions", fontSize = (20 * scale).sp, fontWeight = FontWeight.Bold)
-                ActionRow("Talk to AI Coach", "Ask a wellness question", "✦") { go(Tab.Coach) }
-                ActionRow("My reminders", "See your daily reminders", "◉") { go(Tab.Reminders) }
-                ActionRow("My profile", "Personal and accessibility settings", "☺") { go(Tab.Profile) }
-            }
-        }
-        item { Text(if (elder) "Elder Mode is ON · Larger text and clearer controls" else "Tip: Take a short stretch break every hour.", Modifier.padding(horizontal = 20.dp), color = Teal, fontSize = (13 * scale).sp) }
-    }
-}
 
-@Composable
-private fun Metric(icon: String, title: String, value: String, note: String, modifier: Modifier, scale: Float) {
-    Panel(modifier) {
-        Text(icon, fontSize = 24.sp)
-        Text(title, color = Muted, fontSize = (12 * scale).sp)
-        Text(value, color = Ink, fontSize = (18 * scale).sp, fontWeight = FontWeight.Bold)
-        Text(note, color = Muted, fontSize = (11 * scale).sp)
-    }
-}
+        Spacer(modifier = Modifier.height(25.dp))
 
-@Composable
-private fun ActionRow(title: String, subtitle: String, icon: String, click: () -> Unit) {
-    Card(Modifier.fillMaxWidth().clickable(onClick = click), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(44.dp).background(Mint, CircleShape), contentAlignment = Alignment.Center) { Text(icon, color = Teal, fontSize = 23.sp) }
-            Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                Text(title, color = Ink, fontWeight = FontWeight.Bold)
-                Text(subtitle, color = Muted, fontSize = 12.sp)
-            }
-            Text("›", color = Teal, fontSize = 28.sp)
-        }
-    }
-}
+        Text("Today's Overview", fontSize = 22.sp,
+            fontWeight = FontWeight.Bold, color = Dark)
 
-@Composable
-private fun ProgressScreen(scale: Float) {
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-        item { Header("Your progress", "Track your daily wellness habits.", scale) }
-        item { ProgressItem("👟", "Daily steps", "3,250", "6,000 steps goal", .54f, scale) }
-        item { ProgressItem("💧", "Water intake", "4 of 8 glasses", "Stay hydrated through the day", .5f, scale) }
-        item { ProgressItem("🌙", "Sleep", "7.5 hours", "Goal: 8 hours", .94f, scale) }
-        item { ProgressItem("🏃", "Active minutes", "20 minutes", "Goal: 30 minutes", .67f, scale) }
-        item {
-            Panel(Modifier.padding(horizontal = 16.dp)) {
-                Text("Weekly reflection", fontSize = (19 * scale).sp, fontWeight = FontWeight.Bold)
-                Text("You are building healthy routines. Celebrate your consistency and choose one small goal for tomorrow.", color = Muted, fontSize = (14 * scale).sp)
-            }
-        }
-        item { Text("Sample values for demonstration. Real device data can be connected in a future version.", Modifier.padding(horizontal = 20.dp), color = Muted, fontSize = 11.sp) }
-    }
-}
+        Spacer(modifier = Modifier.height(12.dp))
 
-@Composable
-private fun ProgressItem(icon: String, title: String, value: String, goal: String, amount: Float, scale: Float) {
-    Panel(Modifier.padding(horizontal = 16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(icon, fontSize = 26.sp)
-            Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                Text(title, fontSize = (16 * scale).sp, fontWeight = FontWeight.Bold)
-                Text(goal, color = Muted, fontSize = (12 * scale).sp)
-            }
-            Text(value, color = Teal, fontSize = (13 * scale).sp, fontWeight = FontWeight.Bold)
-        }
-        Spacer(Modifier.height(12.dp))
-        LinearProgressIndicator(progress = { amount }, Modifier.fillMaxWidth().height(9.dp), color = Teal, trackColor = Mint)
-    }
-}
-
-@Composable
-private fun CoachScreen(scale: Float, question: String, onQuestion: (String) -> Unit, chat: List<String>, send: () -> Unit) {
-    Column(Modifier.fillMaxSize()) {
-        Header("AI Wellness Coach", "Friendly guidance for everyday wellbeing.", scale)
-        Card(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-            LazyColumn(Modifier.fillMaxSize().padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                item {
-                    Text("✦ HealthVista Coach", color = Teal, fontWeight = FontWeight.Bold, fontSize = (17 * scale).sp)
-                    Text("I can help with general wellness habits, activity ideas and reminders.", color = Muted, fontSize = (13 * scale).sp)
-                }
-                items(chat) { line ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = if (line.startsWith("You:")) Arrangement.End else Arrangement.Start) {
-                        Surface(color = if (line.startsWith("You:")) Mint else Page, shape = RoundedCornerShape(16.dp)) {
-                            Text(line, Modifier.padding(12.dp).widthIn(max = 280.dp), color = Ink, fontSize = (14 * scale).sp)
-                        }
-                    }
-                }
-            }
-        }
-        Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(question, onQuestion, Modifier.weight(1f), placeholder = { Text("Type your question…") }, shape = RoundedCornerShape(18.dp), maxLines = 3)
-            Spacer(Modifier.width(8.dp))
-            Button(onClick = send, modifier = Modifier.size(if (scale > 1f) 60.dp else 48.dp), shape = CircleShape, contentPadding = PaddingValues(15.dp)) { Text("➤", fontSize = (18 * scale).sp) }
-        }
-        Text("Prototype chat uses sample responses, not medical advice.", Modifier.padding(horizontal = 16.dp), color = Muted, fontSize = 10.sp)
-    }
-}
-
-@Composable
-private fun ReminderScreen(scale: Float, text: String, onText: (String) -> Unit, reminders: List<String>, add: () -> Unit, remove: (String) -> Unit) {
-    Column(Modifier.fillMaxSize()) {
-        Header("My reminders", "Gentle nudges for your daily routine.", scale)
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(text, onText, Modifier.weight(1f), placeholder = { Text("Add a reminder") }, shape = RoundedCornerShape(16.dp), singleLine = true)
-            Spacer(Modifier.width(8.dp))
-            Button(onClick = add, modifier = Modifier.height(if (scale > 1f) 60.dp else 54.dp)) { Text("Add", fontSize = (14 * scale).sp) }
-        }
-        Text("TODAY", Modifier.padding(start = 20.dp, top = 20.dp, bottom = 10.dp), color = Teal, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-        LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            items(reminders) { item ->
-                Card(shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                    Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text("◉", color = Teal, fontSize = 23.sp)
-                        Text(item, Modifier.weight(1f).padding(horizontal = 12.dp), color = Ink, fontSize = (15 * scale).sp)
-                        TextButton(onClick = { remove(item) }, modifier = Modifier.heightIn(min = if (scale > 1f) 52.dp else 40.dp)) { Text("Done", fontSize = (14 * scale).sp) }
-                    }
-                }
-            }
-            if (reminders.isEmpty()) item { Text("No reminders yet. Add one above.", color = Muted) }
-        }
-    }
-}
-@Composable
-private fun ProfileScreen(scale: Float, elder: Boolean, onElder: (Boolean) -> Unit) {
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { Header("My profile", "Your account and accessibility settings.", scale) }
-        item {
-            Panel(Modifier.padding(horizontal = 16.dp)) {
+        // WATER TRACKER
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("💧 Water Intake", fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold)
+                Text("$water / 8 glasses")
+                LinearProgressIndicator(
+                    progress = { water / 8f },
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Green
+                )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(62.dp).background(Mint, CircleShape), contentAlignment = Alignment.Center) { Text("☺", color = Teal, fontSize = 34.sp) }
-                    Column(Modifier.padding(start = 14.dp)) {
-                        Text("HealthVista Member", fontSize = (18 * scale).sp, fontWeight = FontWeight.Bold)
-                        Text("Your wellness journey", color = Muted, fontSize = (13 * scale).sp)
+                    OutlinedButton(onClick = {
+                        if (water > 0) water--
+                    }) {
+                        Text("-")
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Button(onClick = {
+                        if (water < 8) water++
+                    }) {
+                        Text("+ Add Glass")
                     }
                 }
             }
         }
-        item {
-            Panel(Modifier.padding(horizontal = 16.dp)) {
-                Text("Accessibility", fontSize = (19 * scale).sp, fontWeight = FontWeight.Bold)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Elder Mode", fontSize = (16 * scale).sp, fontWeight = FontWeight.Bold)
-                        Text("Large text, large buttons and simpler navigation", color = Muted, fontSize = (12 * scale).sp)
-                    }
-                    Switch(
-                        checked = elder,
-                        onCheckedChange = onElder,
-                        modifier = Modifier.sizeIn(minWidth = 56.dp, minHeight = 48.dp)
-                    )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // ACTIVITY TRACKER
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("👟 Activity", fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold)
+                Text(if (activity) "Activity completed!" else "Not recorded")
+                Button(onClick = {
+                    activity = !activity
+                }) {
+                    Text(if (activity) "Undo" else "Mark Completed")
                 }
-                HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Mint)
-                Text("Turn this on for larger text and clearer controls across the app.", color = Muted, fontSize = (13 * scale).sp)
             }
         }
-        item {
-            Panel(Modifier.padding(horizontal = 16.dp)) {
-                Text("About HealthVista", fontSize = (17 * scale).sp, fontWeight = FontWeight.Bold)
-                Text("An AI-powered personalized lifestyle and wellness assistant prototype.", color = Muted, fontSize = (13 * scale).sp)
-                Text("Version 1.0 · Mini Project", color = Teal, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // NUTRITION TRACKER
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("🥗 Nutrition", fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold)
+                Text(if (nutrition) "Healthy meal recorded!" else "Not recorded")
+                Button(onClick = {
+                    nutrition = !nutrition
+                }) {
+                    Text(if (nutrition) "Undo" else "Record Healthy Meal")
+                }
             }
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // SLEEP TRACKER
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("😴 Sleep Tracker", fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold)
+                Text("${sleep.toInt()} hours of sleep")
+                Slider(
+                    value = sleep,
+                    onValueChange = { sleep = it },
+                    valueRange = 0f..12f
+                )
+            }
+        }
+// BMI CALCULATOR
+Card(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.padding(16.dp)) {
+
+        Text("⚖️ BMI Calculator",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text("Height: ${height.toInt()} cm")
+
+        Slider(
+            value = height,
+            onValueChange = { height = it },
+            valueRange = 120f..210f
+        )
+
+        Text("Weight: ${weight.toInt()} kg")
+
+        Slider(
+            value = weight,
+            onValueChange = { weight = it },
+            valueRange = 30f..150f
+        )
+
+        val bmi = weight / ((height / 100f) * (height / 100f))
+
+        Text(
+            "Your BMI: %.1f".format(bmi),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Green
+        )
+
+        Text(
+            when {
+                bmi < 18.5f -> "Underweight"
+                bmi < 25f -> "Normal weight"
+                bmi < 30f -> "Overweight"
+                else -> "Obese"
+            }
+        )
+    }
+}
+        Spacer(modifier = Modifier.height(25.dp))
+
+        Text("Healthy Lifestyle Tips 🌱",
+            fontSize = 22.sp, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        listOf(
+            "💧 Stay Hydrated" to "Drink water regularly throughout the day.",
+            "🥦 Eat Balanced Meals" to "Include fruits and vegetables.",
+            "🚶 Keep Moving" to "Try walking and regular physical activity.",
+            "🌙 Sleep Well" to "Maintain a consistent sleep schedule."
+        ).forEach { tip ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(tip.first, fontWeight = FontWeight.Bold)
+                    Text(tip.second)
+                }
+            }
+        }
+        Text(
+            "Voice Assistant",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = Dark
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        VoiceAssistantSection()
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            "HealthVista • Your health, your journey ❤️",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            color = Green
+        )
     }
 }
