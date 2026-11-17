@@ -2,7 +2,9 @@ name: Build HealthVista APK
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+      - anushka-ui-ux
   workflow_dispatch:
 
 permissions:
