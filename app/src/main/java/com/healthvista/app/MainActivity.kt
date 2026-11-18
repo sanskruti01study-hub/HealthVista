@@ -1,5 +1,7 @@
 package com.healthvista.app
-
+import androidx.compose.ui.platform.LocalContext
+import com.healthvista.app.data.HealthDatabaseHelper
+import com.healthvista.app.ai.AiInsightsSection
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,7 +38,14 @@ HealthVistaApp()
 
 @Composable
 fun HealthVistaApp() {
+    val context = LocalContext.current
 
+    val database = remember {
+        HealthDatabaseHelper(context.applicationContext)
+    }
+
+    // Use the same user ID that you use when saving records.
+    val userId = "demo-user"
     var water by rememberSaveable { mutableStateOf(0) }
     var activity by rememberSaveable { mutableStateOf(false) }
     var nutrition by rememberSaveable { mutableStateOf(false) }
@@ -89,8 +98,22 @@ var weight by rememberSaveable { mutableStateOf(60f) }
                     "Build healthy habits one day at a time.",
                     color = Color.White
                 )
-            }
+                VoiceAssistantSection()
+                Spacer(modifier = Modifier.height(20.dp))
+                VoiceAssistantSection()
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                AiInsightsSection(
+                    database = database,
+                    userId = userId
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                            }
         }
+
 
         Spacer(modifier = Modifier.height(25.dp))
 
