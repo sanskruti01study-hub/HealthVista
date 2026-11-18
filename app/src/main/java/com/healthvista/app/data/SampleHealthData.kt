@@ -2,7 +2,7 @@
 package com.healthvista.app.data
 
 import com.healthvista.app.model.HealthRecord
-
+import com.healthvista.app.data.HealthDatabaseHelper
 object SampleHealthData {
 
     fun getSampleRecords(): List<HealthRecord> {
@@ -96,4 +96,21 @@ object SampleHealthData {
             )
         )
     }
+    fun insertSampleRecords(database: HealthDatabaseHelper) {
+        getSampleRecords().forEach { record ->
+            val existing = database.getRecordByDate(
+                record.userId,
+                record.recordDate
+            )
+
+            if (existing == null) {
+                val result = database.insertRecord(record)
+                android.util.Log.d("HealthVista", "Inserted record: $result")
+            }
+        }
+    }
+
+
+
+
 }

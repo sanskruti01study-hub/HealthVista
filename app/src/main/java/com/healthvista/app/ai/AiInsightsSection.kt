@@ -1,6 +1,6 @@
 
 package com.healthvista.app.ai
-
+import com.healthvista.app.data.SampleHealthData
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -66,7 +66,12 @@ fun AiInsightsSection(
 
                 val response = withContext(Dispatchers.IO) {
 
-                    val records = database.getAllRecords(userId)
+                    val records = withContext(Dispatchers.IO) {
+
+                        SampleHealthData.insertSampleRecords(database)
+
+                        database.getAllRecords(userId)
+                    }
 
                     if (records.isEmpty()) {
                         throw Exception(
